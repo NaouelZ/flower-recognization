@@ -1,49 +1,59 @@
-import os
-import pathlib
 
-import gdown
+import matplotlib.pyplot as plt
 import numpy as np
-from PIL import Image
+import gdown
+import os
+import PIL
+import tensorflow as tf
+
+from tensorflow import keras
+from tensorflow.keras import layers
+from tensorflow.keras.models import Sequential
+
+"""# Download and explore the dataset"""
 
 if not os.path.isfile("dataset.zip"):
     url = 'https://drive.google.com/uc?id=1sQEIPh3bdKQ_1J3g0Z8CRqD6uU7v746l'
     output = 'dataset.zip'
     gdown.download(url, output, quiet=False)
 
-print("test")
-
+import pathlib
 data_dir = pathlib.Path("./flowers")
 image_count = len(list(data_dir.glob('*/*.jpg')))
 print(image_count)
 
-global dataset 
+"""# Load data using a Keras utility
 
-dataset= []
-count = 0
-for label in os.listdir("./flowers/"):
-  for filename in os.listdir(os.path.join("./flowers/",label)):
-    count = count + 1
-    print(str(count) + " ---loading " + filename)
-    image = Image.open(os.path.join("./flowers/",label,filename))
-    image.load()
-    image = np.asarray(image, dtype="float32" )
-    dataset.append((image, label))
+## Create a dataset
 
-import random
+Define some parameters for the loader:
+"""
 
-print(random.sample(dataset, 10))
+global batch_size
+global img_height
+global img_width
 
-import random
+batch_size = 32
+img_height = 180
+img_width = 180
 
-random.shuffle(dataset)
+"""It's good practice to use a validation split when developing your model. Let's use 80% of the images for training, and 20% for validation."""
 
-import matplotlib.pyplot as plt
+global train_ds
+global val_ds
 
-fig, axs = plt.subplots(3, 3, figsize = (12, 12))
-plt.gray()
+train_ds = tf.keras.utils.image_dataset_from_directory(
+  data_dir,
+  validation_split=0.2,
+  subset="training",
+  seed=123,
+  image_size=(img_height, img_width),
+  batch_size=batch_size)
 
-for i, ax in enumerate(axs.flat):
-  ax.imshow(dataset[i][0].astype("int32"))
-  ax.axis('off')
-  ax.set_title(dataset[i][1])
-plt.show()
+val_ds = tf.keras.utils.image_dataset_from_directory(
+  data_dir,
+  validation_split=0.2,
+  subset="validation",
+  seed=123,
+  image_size=(img_height, img_width),
+  batch_size=batch_size)
