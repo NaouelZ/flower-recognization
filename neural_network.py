@@ -20,7 +20,6 @@ from tensorflow import keras
 from tensorflow.keras import layers
 from tensorflow.keras.models import Sequential
 import matplotlib.pyplot as plt
-import train
 
 train_ds = init.train_ds
 val_ds = init.val_ds
@@ -34,15 +33,27 @@ Finally, let's use our model to classify an image that wasn't included in the tr
 Note: Data augmentation and dropout layers are inactive at inference time.
 """
 
+model = Sequential([
+  layers.Rescaling(1./255, input_shape=(init.img_height, init.img_width, 3)),
+  layers.Conv2D(16, 3, padding='same', activation='relu'),
+  layers.MaxPooling2D(),
+  layers.Conv2D(64, 3, strides=(2, 2), padding='same', activation='relu'),
+  layers.MaxPooling2D(),
+  layers.Conv2D(64, 3, padding='same', activation='relu'),
+  layers.MaxPooling2D(),
+  layers.Flatten(),
+  layers.Dense(128, activation='relu'),
+  layers.Dense(5)
+])
+
 for image, label in val_ds.take(8):
   pass
 image = image[0]
 label = label[0]
 
-cv2_imshow(image.numpy()[:,:,::-1])
 image = tf.expand_dims(image, 0) # Create a batch
 
-predictions = train.model.predict(image)
+predictions = model.predict(image)
 score = tf.nn.softmax(predictions[0])
 
 
