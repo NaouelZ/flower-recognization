@@ -10,7 +10,6 @@ Original file is located at
 """
 """You can find the class names in the `class_names` attribute on these datasets. These correspond to the directory names in alphabetical order."""
 
-import init
 
 import os
 
@@ -19,12 +18,14 @@ import numpy as np
 from tensorflow import keras
 from tensorflow.keras import layers
 from tensorflow.keras.models import Sequential
-import matplotlib.pyplot as plt
+
+import init
 
 train_ds = init.train_ds
 val_ds = init.val_ds
 class_names = train_ds.class_names
 print(class_names)
+
 
 """## Predict on new data
 
@@ -58,7 +59,29 @@ score = tf.nn.softmax(predictions[0])
 
 
 print(
-    "This image most likely belongs to {} with a {:.2f} percent confidence."
+  "This image most likely belongs to {} with a {:.2f} percent confidence."
     .format(class_names[np.argmax(score)], 100 * np.max(score))
 )
 print("Ground truth label: {}".format(class_names[label]))
+
+def random_image():
+  for image, label in val_ds.take(8):
+    pass
+  image = image[0]
+  label = label[0]
+
+  image = tf.expand_dims(image, 0) # Create a batch
+
+  predictions = model.predict(image)
+  score = tf.nn.softmax(predictions[0])
+
+
+  print(
+      "This image most likely belongs to {} with a {:.2f} percent confidence."
+      .format(class_names[np.argmax(score)], 100 * np.max(score))
+  )
+  print("Ground truth label: {}".format(class_names[label]))
+  phrase="Ground truth label: {}".format(class_names[label])
+  return phrase
+
+random_image()
